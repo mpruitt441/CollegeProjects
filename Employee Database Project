@@ -1,0 +1,303 @@
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <string>
+using namespace std;
+
+class employee {
+
+	char name[30], hire_date[30], salary[30];
+	int ID;
+
+public:
+
+	employee(string = "", int = 0, string = "", string ="") {
+		void setHireDate(string);
+		string getHireDate();
+
+		void setname(string);
+		string getName();
+
+		void setsal(string);
+		string getsal();
+
+		void setId(int);
+		int getId();
+
+	}
+	
+	void setHireDate(string date) {
+		if (date.size() >= sizeof hire_date) {
+			cout << "Date " << date << " is too long\n";
+		}
+		else {
+			strcpy_s(hire_date, date.c_str());
+		}
+	};
+	
+	void setname(string n) {
+		if (n.size() >= sizeof name) {
+			cout << "Name " << n << " is too long\n";
+		}
+		else {
+			strcpy_s(name, n.c_str());
+		}
+	};
+	
+	void setSalary(string s) {
+		if (s.size() >= sizeof salary) {
+			cout << "Salary " << s << " is too long\n";
+		}
+		else {
+			strcpy_s(salary, s.c_str());
+		}
+	};
+	
+	void setId(int i) {
+		ID = i;
+	};
+
+
+	string getHireDate() {
+		return hire_date;
+	};
+
+	int getId() {
+		return ID;
+	};
+	string getName() {
+		return name;
+	};
+
+	string getsal() {
+		return salary;
+	};
+
+};
+
+int enterChoice();
+void updaterecord(fstream&);
+void outputLine(ostream&, employee &);
+void outputLine(ostream&, employee &, int, fstream&);
+int getid(const char * const);
+void newrecord(fstream&);
+
+enum Choices { UPDATE = 1, NEW, VIEW, END };
+
+
+int main()
+{
+	employee elist;
+	int a, id;
+	string name, hire_date, salary;
+	
+	cout << "Welcome to Mahendra Pruitt's Employee Database!\nEnter a number for the option you would like to select:\nPlease choose option 0 if you haven't already chosen that one.\n" <<
+		"0 - Create a blank new database file that will overwrite all existing data." << endl
+		<< "1 - Choose employee IDs (1-10) and change or add information to their file" << endl
+		<< "2 - Select whether or not you would like to update, view, or add a new record." << endl;
+	
+	cin >> a;
+
+
+	// creating a blank database file
+	employee blankelist;
+	
+	if (a == 0) {
+		while (a == 0) {
+			if (a == 0) {
+
+				
+				ofstream outdatabase("database.dat", ios::out | ios::binary);
+				for (int i = 0; i < 10; i++) {
+					outdatabase.write(reinterpret_cast <const char *> (&blankelist), sizeof(employee));
+				}
+
+				cout << "Enter the number 1 or 2: " << endl
+					<< "1 - Choose employee IDs (1-10) and change or add information to their file" << endl
+					<< "2 - Select whether or not you would like to update, view, or add a new record." << endl;
+				cin >> a;
+
+			}
+		}
+	}
+
+	// writing section
+	if (a == 1) {
+
+		fstream outdatabase("database.dat", ios::in | ios::out | ios::binary);
+
+		employee employed;
+		cout << "Enter employee ID (1-10) or 0 to end input: " << endl;
+		cin >> id;
+
+		while (id > 0 && id <= 10)
+
+		{
+			cout << "Enter name(First_Last), salary, then hire date (MM/DD/YYYY): " << endl;
+			cin >> name;
+			cin >> salary;
+			cin >> hire_date;
+			
+			employed.setId(id);
+			employed.setname(name);
+			employed.setSalary(salary);
+			employed.setHireDate(hire_date);
+
+			outdatabase.seekp((employed.getId() - 1) * sizeof(employee));
+			outdatabase.write(reinterpret_cast <const char *> (&employed),
+				sizeof(employee));
+
+			cout << "Enter employee ID (1-10) or 0 to end input:  " << endl;
+			cin >> id;
+		}
+		cout << "Enter the number 2: " << endl
+			<< "2 - Select whether or not you would like to update, view, or add a new record." << endl;
+		cin >> a;
+	}
+
+	if (a == 2) {
+
+		fstream outdatabase("database.dat", ios::out | ios::in | ios::binary);
+		int choice;
+		employee employed;
+		while ((choice = enterChoice()) != END)
+		{
+			switch (choice)
+			{
+			case UPDATE:
+				updaterecord(outdatabase);
+				break;
+			case NEW:
+				newrecord(outdatabase);
+				break;
+			case VIEW:
+				int i;
+				cout << "Which record would you like to view? (1-10). Enter 0 to go back to the menu.: " << endl;
+				cin >> i;
+				if (i != 0 && i <= 10) {
+					outputLine(cout, employed, i, outdatabase);
+					break;
+				}
+				else if (i = 0)
+				{
+					cout << "Returning to main menu..." << endl;
+					break;
+				}
+				else {
+					cerr << "Incorrect choice. Please enter a number between 1 and 10. Returning to main menu..." << endl;
+					break;
+				}
+			default:
+				cerr << "Incorrect choice" << endl;
+				break;
+			}
+			outdatabase.clear();
+		}
+	}
+
+	return 0;
+} // end main
+int enterChoice() {
+	cout << "\nEnter your choice: " << endl
+		<< "1 - Update an account" << endl
+		<< "2 - Add a new account" << endl
+		<< "3 - View record" << endl
+		<< "4 - End program" << endl;
+
+	int choice;
+	cin >> choice;
+	return choice;
+}
+void updaterecord(fstream &updateFile) {
+
+	int id = getid("Enter account to update");
+	{
+		employee employed;
+		
+		updateFile.seekg((id - 1) * sizeof(employee));
+		updateFile.read(reinterpret_cast <char *> (&employed), sizeof(employee));
+
+		if (employed.getId() != 0)
+		{
+			outputLine(cout, employed);
+
+			cout << "\nEnter the new name(First_Last), salary, and hire date (MM/DD/YYYY): ";
+			
+			string name, salary, hire_date;
+			
+			cin >> name >> salary >> hire_date;
+
+			string oldsalary = employed.getsal();
+
+			employed.setname(name);
+			employed.setSalary(salary);
+			employed.setHireDate(hire_date);
+			
+			updateFile.seekp((id - 1) * sizeof(employee));
+			updateFile.write(reinterpret_cast <const char *> (&employed),
+				sizeof(employee));
+		}
+		else
+		{
+			cerr << "Account # " << id << " has no information." << endl;
+		}
+	}
+}
+void newrecord(fstream &insertinfile) {
+
+	int id = getid("Enter new employee ID. Please note that this will rewrite any existing information to that ID.");
+	employee employed;
+
+	insertinfile.seekg((id - 1) * sizeof(employee));
+
+	insertinfile.read(reinterpret_cast <char *>(&employed), sizeof(employee));
+
+	string name, salary, hire_date;
+
+
+	cout << "Enter name(First_Last), salary, and hire date(MM/DD/YYYY): " << endl;
+	cin >> name;
+	cin >> salary;
+	cin >> hire_date;
+
+	employed.setname(name);
+	employed.setSalary(salary);
+	employed.setHireDate(hire_date);
+
+	employed.setId(id);
+	// changed here too
+	insertinfile.seekp((id - 1) * sizeof(employee));
+
+	insertinfile.write(reinterpret_cast<const char *> (&employed), sizeof(employee));
+
+
+}
+int getid(const char * const prompt)
+{
+	int id;
+	do
+	{
+		cout << prompt << "(1-10): ";
+		cin >> id;
+	} while (id < 1 || id > 10);
+
+	return id;
+}
+void outputLine(ostream &output, employee &employed)
+{
+	output << "ID: " << employed.getId() << endl
+		<< "Name: " << employed.getName() << endl
+		<< "Salary: " << employed.getsal() << endl
+		<< "Hire date: " << employed.getHireDate() << endl;
+
+}
+void outputLine(ostream &output, employee &employed, int i, fstream &readfromfile)
+{
+	int id = i;
+	readfromfile.seekg((id - 1) * sizeof(employee));
+	readfromfile.read(reinterpret_cast <char *>(&employed), sizeof(employee));
+	output << "ID: " << employed.getId() << endl
+		<< "Name: " << employed.getName() << endl
+		<< "Salary: " << employed.getsal() << endl
+		<< "Hire date: " << employed.getHireDate() << endl;
+}
