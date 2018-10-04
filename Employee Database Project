@@ -1,3 +1,7 @@
+// Employee database project
+// Purpose: Create employee "records" using object oriented programming that writes to a save locally
+// Functions include updating existing records, creating new records, and deleting records.
+
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
