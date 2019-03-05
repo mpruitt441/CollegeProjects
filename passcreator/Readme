@@ -1,0 +1,3 @@
+Creates a random password and copies to clipboard with the following attributes:
+1) Between 8-16 digits (Randomized)
+2) Uppercase, lowercase, numbers, and symbols (Randomized)
