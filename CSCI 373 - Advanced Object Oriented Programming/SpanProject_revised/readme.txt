@@ -1,0 +1,1 @@
+-> Find the span of data given financial data information
