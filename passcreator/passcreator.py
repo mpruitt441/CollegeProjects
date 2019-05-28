@@ -3,25 +3,14 @@ import string
 import pyperclip
 
 def shuffle(shuffles):
-    index = 0
-    while index < shuffles:
-        random.shuffle(abet)
-        index += 1
-    index = 0
-    shuffles = random.randint(0,255)
-    while index < shuffles:
-        random.shuffle(cabet)
-        index += 1
-    index = 0
-    shuffles = random.randint(0,255)
-    while index < shuffles:
-        random.shuffle(digits)
-        index += 1
-    index = 0
-    shuffles = random.randint(0,255)
-    while index < shuffles:
-        random.shuffle(symbols)
-        index += 1
+    chars = [abet,cabet,digits,symbols]
+
+    for i in chars:
+        ind = 0
+        while ind < shuffles:
+            random.shuffle(i)
+            #print(i)
+            ind += 1
 
 def getPassword():
     size = random.randint(8,16)
@@ -45,5 +34,3 @@ digits = list(string.digits)
 symbols = ["!","@","#","$","%","$","%","^","^","&","*","(",")"]
 shuffle(shuff)
 getPassword()
-
-
